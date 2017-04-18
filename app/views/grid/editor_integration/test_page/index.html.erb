@@ -1,0 +1,32 @@
+<body>
+  <script src="<%= editor_js_url %>"></script>
+  <link rel="stylesheet" type="text/css" href="<%= editor_css_url %>"/>
+  <link rel="stylesheet" type="text/css" href="<%= editor_theme_css_url %>"/>
+
+  <div class="editor-3-holder">
+    <div class="stk-editor" id="setka-editor">
+    </div>
+  </div>
+
+  <script>
+    document.body.onload = function(){
+      var setkaEditorCfg = <%= raw storage.get_content_by_file_name("#{Grid::EditorIntegration.theme_files}/#{Grid::EditorIntegration.theme_file}.json") %>;
+      var postTheme = "<%= @post.theme %>";
+      var postLayout = "<%= @post.layout %>";
+      if(postTheme.trim() != ""){ setkaEditorCfg.config.theme = postTheme; }
+      if(postLayout.trim() != ""){ setkaEditorCfg.config.layout = postLayout; }
+      setkaEditorCfg.config.restApiUrl = ""; //url for images and snippets processing
+      setkaEditorCfg.config.restApiRequestPayload = {
+        // use this to add protection from forgery
+        // document.getElementsByName('authenticity_token')[0].value
+        authenticity_token: ""
+      };
+      setkaEditorCfg.config.postWidthPresets = <%= width_presets.to_json %>;
+      setkaEditorCfg.assets.images = <%= raw @post.images.to_json %>;
+      SetkaEditor.start(setkaEditorCfg.config, setkaEditorCfg.assets);
+      SetkaEditor.replaceHTML(decodeURIComponent(escape(
+        atob("<%= raw Base64.encode64(@post.body ? @post.body : '').gsub(/\n/, "") %>")
+      )));
+    };
+  </script>
+</body>
