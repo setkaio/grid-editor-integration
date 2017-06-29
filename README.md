@@ -1,27 +1,29 @@
 Grid Editor Integration
 =======================
-Этот проект позволяет интегрировать в приложения на основе RubyOnRails [SetkaEditor](http://ru.setka.io/editor/) - удобный плагин для оформления статей.
 
-Gem предоставляет возможность [скачивания и обновления плагина](app/controllers/grid/editor_integration/config_controller.rb), [создания сниппетов](app/controllers/grid/editor_integration/snippets_controller.rb).
+This project allows you to integrate [SetkaEditor](https://setka.io/editor/) into applications based on RubyOnRails.
 
-Поскольку плагин может храниться не только в локальной файловой системе, мы реализовали [хранилища](lib/grid/editor_integration/storages/abstract.rb) - [файловое](lib/grid/editor_integration/storages/file.rb) и [S3](lib/grid/editor_integration/storages/s3.rb). Также при необходимости можно реализовать свой класс хранилища и использовать его.
+Gem provides the ability to [download and update](app/controllers/grid/editor_integration/config_controller.rb) the plugin and to [create snippets](app/controllers/grid/editor_integration/snippets_controller.rb).
 
-Также рекомендуем ознакомиться с [примером приложения, использующим интеграцию](spec/test_app)
+Since the plugin can be stored not only in the local file system, we implemented two types of [storage](lib/grid/editor_integration/storages/abstract.rb) - [file](lib/grid/editor_integration/storages/file.rb) and [S3](lib/grid/editor_integration/storages/s3.rb). In addition you can implement and use your own custom storage class.
 
-Установка
----------
-Добавьте в Gemfile строку
-```gem 'grid-editor-integration', git: 'ssh://git@grid-editor-integration.git'```
-Либо установите gem вручную.
+We also recommend you to check out [application sample](spec/test_app) that uses integration.
 
-Настройка
----------
-Необходимо задать параметры
+Installation
+-------------
+Add the gem line 'grid-editor-integration' in Gemfile, or install gem manually.
+```ruby
+gem 'grid-editor-integration', git: 'ssh://git@grid-editor-integration.git'
 ```
+
+Implementation
+--------------
+You need to set up the following parameters:
+```ruby
 Grid::EditorIntegration.token
 Grid::EditorIntegration.storage
 ```
+By default, the [File storage](lib/grid/editor_integration/storages/file.rb) will be used. All default parameters and their default values can be viewed [here](lib/grid/editor_integration.rb).
 
-По-умолчанию будет использоваться [файловое](lib/grid/editor_integration/storages/file.rb) хранилище. Все параметры и их значения по-умолчанию можно посмотреть [здесь](lib/grid/editor_integration.rb)
 
 This uses MIT-LICENSE
