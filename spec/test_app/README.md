@@ -1,13 +1,11 @@
-Инструкции по настройке приложения
-==================================
+How to set up applications
+==========================
 
-Для начала рекомендуем ознакомиться с [файлом инициализации приложения](config/initializers/grid_editor_integration.rb).
+To begin with, we recommend to review the [application initialization file](config/initializers/grid_editor_integration.rb).
 
-Параметры для сервера SetkaEditor являются обязательными.
+Parameters for the SetkaEditor server are mandatory.
 
-Также необходимо задать параметры для какого-либо хранилища (локального или AWS).
+You also need to specify parameters for a storage (local or AWS).
+**Grid::EditorIntegration.version_file_name** parameter must contain the filename in which a parameter to reset browser cache will be stored. It is necessary for the cache to be reset each time the SetkaEditor is updated and for the cache to operate between the updates.
 
-Параметр **Grid::EditorIntegration.version_file_name** должен содержать имя файла, в котором будет храниться параметр для сброса браузерного кэша.
-Это необходимо, чтобы кэш сбрасывался при каждом обновлении SetkaEditor, но между обновлениями кэш работал.
-
-При необходимости можно хранить эту информацию в СУБД, memcached и пр. Для этого надо переопределить методы **read_version** и **update_version** в файле [Utils](lib/grid/editor_integration/utils.rb)
+You can also store this information in DB, memcached, etc. To do this, you need to override the read_version and **update_version** methods in the [Utils file](lib/grid/editor_integration/utils.rb).
