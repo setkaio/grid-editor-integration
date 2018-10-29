@@ -37,8 +37,8 @@ module Grid
         update_version
       end
 
-      def self.clear(version)
-        storage = Grid::EditorIntegration::Storages::Factory.create_from_global_settings(version)
+      def self.clear
+        storage = Grid::EditorIntegration::Storages::Factory.create_from_global_settings
         storage.clear
       end
 

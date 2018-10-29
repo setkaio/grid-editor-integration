@@ -9,7 +9,6 @@ module Grid
         @storage = Grid::EditorIntegration::Storages::Factory.create_storage(
           Grid::EditorIntegration.storage,
           Grid::EditorIntegration.path,
-          get_major_version(config["content_editor_version"]),
           Grid::EditorIntegration.cdn_url,
           Grid::EditorIntegration.options_for_storage)
 
@@ -64,15 +63,6 @@ module Grid
               content_type: Grid::EditorIntegration::CONTENT_TYPES[item["filetype"]]
             }
           }
-        end
-
-        def get_major_version(version)
-          if version
-            v = version.split(".").first.to_i
-            version[/^(\d[.]){2}\d/] ? v : 1
-          else
-            1
-          end
         end
 
         def download_files(urls)

@@ -2,11 +2,10 @@ module Grid
   module EditorIntegration
     module Storages
       class AbstractStorage
-        attr_accessor :path, :version, :cdn_url
+        attr_accessor :path, :cdn_url
 
-        def initialize(path = nil, version = nil, cdn_url = "", options = {})
-          self.path = path
-          self.version = version
+        def initialize(path = nil, cdn_url = "", options = {})
+          self.path = options[:prefix] ? ::File.join(options[:prefix], path) : path
           self.cdn_url = cdn_url
         end
 
@@ -16,13 +15,11 @@ module Grid
 
         def create_path() raise NotImplementedError; end
 
-        def create_versioned_path() raise NotImplementedError; end
-
         def save_content_in_file(content, file_name, options = {})
           raise NotImplementedError
         end
-        
-        def file_url(file_name) "#{cdn_url}/#{path}/#{version}/#{file_name}"; end
+
+        def file_url(file_name) "#{cdn_url}/#{path}/#{file_name}"; end
 
         def get_content_by_file_name(file_name) raise NotImplementedError; end
 
