@@ -1,10 +1,43 @@
 require "spec_helper"
 
 describe Grid::EditorIntegration::Utils do
+  let(:editor_config) {
+    {
+        "token" => Grid::EditorIntegration.token,
+        "content_editor_version" => "1",
+        "data" => {
+          "plugins" => [ {
+            "url" => "https://ceditor.setka.io/public.js",
+            "filetype" => "js"
+          } ],
+          "theme_files" => [ {
+            "id" => 1,
+            "url" => "https://ceditor.setka.io/theme.min.css",
+            "filetype" => "css"
+          }, {
+            "id" => 1,
+            "url" => "https://ceditor.setka.io/theme.json",
+            "filetype" => "json"
+          } ],
+          "content_editor_files" => [ {
+            "id" => 1,
+            "url" => "https://ceditor.setka.io/editor.min.css",
+            "filetype" => "css"
+          }, {
+              "id" => 1,
+              "url" => "https://ceditor.setka.io/editor.min.js",
+              "filetype" => "js"
+          } ]
+        }
+      }
+  }
+
   context "Initial sync" do
     let(:subscription) { create(:subscription) }
 
-    it 'fails without token' do
+    it "fails without token" do
+      stub_request(:get, "https://editor.setka.io/api/v1/custom/builds/current").and_return(status: 401, body: '{"error":"Not authorized!"}')
+
       old_token = Grid::EditorIntegration.token
       Grid::EditorIntegration.token = ""
       expect { Grid::EditorIntegration::Utils.init_sync }.to(
@@ -13,20 +46,32 @@ describe Grid::EditorIntegration::Utils do
       Grid::EditorIntegration.token = old_token
     end
 
-    it 'success with correct token' do
+    it "success with correct token" do
+      stub_request(:get, "https://editor.setka.io/api/v1/custom/builds/current").and_return(status: 200, body: editor_config.to_json)
+
       expect { Grid::EditorIntegration::Utils.init_sync }.not_to(raise_error)
     end
   end
 
+
   context "Download editor" do
+    before(:each) do
+      stub_request(:get, "https://editor.setka.io/api/v1/custom/builds/current").and_return(status: 200, body: editor_config.to_json)
+      stub_request(:get, "https://ceditor.setka.io/public.js").and_return(status: 200, body: "")
+      stub_request(:get, "https://ceditor.setka.io/theme.min.css").and_return(status: 200, body: "")
+      stub_request(:get, "https://ceditor.setka.io/theme.json").and_return(status: 200, body: "")
+      stub_request(:get, "https://ceditor.setka.io/editor.min.css").and_return(status: 200, body: "")
+      stub_request(:get, "https://ceditor.setka.io/editor.min.js").and_return(status: 200, body: "")
+    end
+
     def check_download
-      storage = Grid::EditorIntegration::Storages::Factory.create_from_global_settings('1')
+      storage = Grid::EditorIntegration::Storages::Factory.create_from_global_settings
 
       cfg = Grid::EditorIntegration::Utils.get_config
 
-      Grid::EditorIntegration::Utils.clear(cfg["content_editor_version"])
+      Grid::EditorIntegration::Utils.clear
 
-      expect { Grid::EditorIntegration::Utils.download_editor(cfg) }.not_to(raise_error)
+      expect { Grid::EditorIntegration::Utils.download_editor(cfg["data"]) }.not_to(raise_error)
 
       Grid::EditorIntegration.editor_file_types.each do |file_type|
         path_with_file_type = "#{Grid::EditorIntegration.send("#{file_type}_files")}/#{Grid::EditorIntegration.send("#{file_type}_file")}"
@@ -34,44 +79,22 @@ describe Grid::EditorIntegration::Utils do
           name = "#{path_with_file_type}.#{ext}"
           expect(storage.file_exists?(name)).to be_truthy
 
-          if Grid::EditorIntegration.cdn_url!=""
+          if Grid::EditorIntegration.cdn_url != ""
             res = Net::HTTP.get_response(URI(storage.file_url(name)))
-            expect(res.code).to eq '200'
+            expect(res.code).to eq("200")
           end
         end
       end
 
-      Grid::EditorIntegration::Utils.clear(cfg["content_editor_version"])
+      Grid::EditorIntegration::Utils.clear
     end
 
-    it 'success v1 on file system' do
-      Grid::EditorIntegration.cdn_url = ""
-      Grid::EditorIntegration.storage = "file"
-      Grid::EditorIntegration.options_for_storage = {
-        path: "#{Dir.pwd}/spec/test_app/public/"
-      }
+    it "success on file system", file_storage: true do
 
       check_download
     end
 
-    it 'success v1 on aws system' do
-      unless ENV['AWS_ENDPOINT']
-        skip "Set S3 storage params to test this feature"
-      end
-      Grid::EditorIntegration.cdn_url = ENV['GRID_CDN_URL'] || ENV['AWS_ENDPOINT']
-      Grid::EditorIntegration.storage = "s3"
-      Grid::EditorIntegration.options_for_storage = {
-        access_key_id: ENV['AWS_ACCESS_KEY_ID'],
-        secret_access_key: ENV['AWS_SECRET_ACCESS_KEY'],
-        use_ssl: false,
-        s3_protocol: ENV['AWS_PROTOCOL'],
-        s3_endpoint: ENV['AWS_ENDPOINT'],
-        s3_region: ENV['AWS_REGION'],
-        s3_force_path_style: true,
-        bucket: ENV['AWS_BUCKET'],
-        content_encoding: 'gzip'
-      }
-
+    it "success on aws system", aws_storage: true do
       check_download
     end
   end

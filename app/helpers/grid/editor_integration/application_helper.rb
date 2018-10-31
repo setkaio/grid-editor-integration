@@ -22,11 +22,10 @@ module Grid
         "#{storage.file_url(file_name)}?_dc=#{Grid::EditorIntegration::Utils.read_version}"
       end
 
-      def storage(version = '1')
+      def storage
         @storage ||= Grid::EditorIntegration::Storages::Factory.create_storage(
           Grid::EditorIntegration.storage,
           Grid::EditorIntegration.path,
-          version,
           Grid::EditorIntegration.cdn_url,
           Grid::EditorIntegration.options_for_storage)
       end

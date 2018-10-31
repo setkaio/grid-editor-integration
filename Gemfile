@@ -8,3 +8,9 @@ gemspec
 # your gemspec. These might include edge Rails or gems from your path or
 # Git. Remember to move these dependencies to your gemspec before releasing
 # your gem to rubygems.org.
+
+
+group :test do
+  gem "webmock", require: false
+  gem "simplecov", require: false
+end
