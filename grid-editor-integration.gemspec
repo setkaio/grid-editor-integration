@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.version     = Grid::EditorIntegration::VERSION
   s.authors     = ["sov-87"]
   s.email       = ["developers@setka.io"]
-  s.homepage    = "https://github.com/sov-87/grid-editor-integration"
+  s.homepage    = "https://github.com/setkaio/grid-editor-integration"
   s.summary     = "Setka Editor"
   s.description = "Integrate Setka Editor into your system"
   s.license     = "MIT"
